@@ -15,8 +15,8 @@ class UsersController < ApplicationController
   end
 
   def update
-    @user = User.find(params[:id])
-    @user.name = params[:new_name]
+    @user = User.find(params[:id]) # this param is inside of the url itself
+    @user.name = params[:new_name] # this param is inside of the request body
     @user.save
   end
 
@@ -29,13 +29,33 @@ class UsersController < ApplicationController
       @tool.save
       @created_tools.push(@tool)
     end
-
-    
   end
 
   def get_tools
     @created_tools = User.find(params[:id]).tools
     render :add_tools
+  end
+
+  def add_apps_for_user
+    @added_apps = []
+    params[:app_ids].each do |app_id|
+      @app = App.find(app_id)
+      if @app then 
+        # create the market table relation; this will tie the app to the user (user.app will return this app)
+        @market = Market.new
+        @market.user_id = params[:id]
+        @market.app_id = app_id
+        @market.save
+        @added_apps.push(@app)
+      end
+    end
+
+    render :add_apps
+  end
+
+  def show_apps_for_user
+    @added_apps = User.find(params[:id]).apps
+    render :add_apps
   end
 
   private
